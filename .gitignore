@@ -1,0 +1,17 @@
+# Rails
+blog_service/log/*
+blog_service/tmp/*
+blog_service/storage/*
+blog_service/config/master.key
+!blog_service/log/.keep
+!blog_service/tmp/.keep
+!blog_service/storage/.keep
+
+# Vue
+blog_frontend/node_modules
+blog_frontend/dist
+
+# IDE
+.DS_Store
+.idea
+.vscode

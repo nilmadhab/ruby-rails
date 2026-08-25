@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ruby --version:*)",
+      "Bash(rbenv install:*)",
+      "Bash(rbenv global:*)",
+      "Bash(rbenv rehash:*)",
+      "Bash(gem install:*)",
+      "Bash(rails new:*)",
+      "Bash(bin/rails generate:*)",
+      "Bash(bundle install:*)",
+      "Bash(bin/rails db:create:*)",
+      "Bash(bin/rails db:migrate:*)",
+      "Bash(bin/rails routes:*)",
+      "Bash(npm create:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ]
+  }
+}
