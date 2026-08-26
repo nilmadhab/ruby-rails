@@ -63,4 +63,12 @@ export const postService = {
   delete: (id) => api.delete(`/posts/${id}`)
 }
 
+export const commentService = {
+  getAll: (postId) => api.get(`/posts/${postId}/comments`),
+  get: (postId, id) => api.get(`/posts/${postId}/comments/${id}`),
+  create: (postId, data) => api.post(`/posts/${postId}/comments`, { comment: data }),
+  update: (postId, id, data) => api.patch(`/posts/${postId}/comments/${id}`, { comment: data }),
+  delete: (postId, id) => api.delete(`/posts/${postId}/comments/${id}`)
+}
+
 export default api

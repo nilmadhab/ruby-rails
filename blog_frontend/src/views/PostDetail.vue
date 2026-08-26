@@ -13,18 +13,40 @@
       <router-link :to="`/posts/${post.id}/edit`" class="btn">Edit Post</router-link>
       <button @click="deletePost" class="btn delete">Delete Post</button>
     </div>
+
+    <!-- Comments Section -->
+    <section class="comments-section">
+      <h2>Comments ({{ comments.length }})</h2>
+
+
+      <!-- Comments List -->
+      <div v-if="comments.length === 0" class="no-comments">
+        No comments yet. Be the first to comment!
+      </div>
+      <div v-else class="comments-list">
+        <div v-for="comment in comments" :key="comment.id" class="comment">
+          <div class="comment-header">
+            <strong>{{ comment.user?.name || 'Anonymous' }}</strong>
+            <span class="comment-date">{{ formatDate(comment.created_at) }}</span>
+          </div>
+          <p class="comment-body">{{ comment.body }}</p>
+        </div>
+      </div>
+    </section>
   </div>
   <div v-else class="loading">Loading...</div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { postService } from '../services/api'
-
 const route = useRoute()
 const router = useRouter()
+
 const post = ref(null)
+
+const comments = computed(() => post.value?.comments || [])
 
 const loadPost = async () => {
   const res = await postService.get(route.params.id)
@@ -36,6 +58,15 @@ const deletePost = async () => {
     await postService.delete(route.params.id)
     router.push('/posts')
   }
+}
+
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })
 }
 
 onMounted(loadPost)
@@ -53,4 +84,41 @@ h1 { margin: 10px 0; font-size: 2em; }
 .btn { background: #42b883; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; border: none; cursor: pointer; }
 .btn.delete { background: #e74c3c; }
 .loading { padding: 40px; text-align: center; color: #888; }
+
+/* Comments Section */
+.comments-section {
+  margin-top: 50px;
+  border-top: 1px solid #eee;
+  padding-top: 30px;
+}
+.comments-section h2 {
+  margin-bottom: 20px;
+}
+.no-comments {
+  color: #888;
+  font-style: italic;
+}
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.comment {
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+}
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.comment-date {
+  color: #888;
+  font-size: 0.85em;
+}
+.comment-body {
+  margin: 0;
+  line-height: 1.5;
+}
 </style>

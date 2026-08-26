@@ -3,12 +3,12 @@ class Api::V1::PostsController < ApplicationController
   before_action :set_post, only: [:show, :update, :destroy]
 
   def index
-    @posts = Post.includes(:user, :category).all
-    render json: @posts, include: [:user, :category]
+    @posts = Post.includes(:user, :category, :comments).all
+    render json: @posts, include: [:user, :category, :comments]
   end
 
   def show
-    render json: @post, include: [:user, :category]
+    render json: @post, include: [:user, :category, :comments]
   end
 
   def create

@@ -1,4 +1,4 @@
-class APi::V1::CommentsController < ApplicationController
+class Api::V1::CommentsController < ApplicationController
 
     skip_before_action :authenticate_request, only: [:index]
 
@@ -18,5 +18,5 @@ class APi::V1::CommentsController < ApplicationController
         @comment = Comment.find(params[:id])
     end
 
-    
+
 end
