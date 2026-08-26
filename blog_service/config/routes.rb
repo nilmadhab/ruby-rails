@@ -10,6 +10,7 @@ Rails.application.routes.draw do
       resources :users
       resources :categories
       resources :posts
+      resources :comments, only: [:index, :show]
     end
   end
 
