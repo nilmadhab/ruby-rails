@@ -18,6 +18,20 @@
     <section class="comments-section">
       <h2>Comments ({{ comments.length }})</h2>
 
+      <!-- Add Comment Form -->
+      <div v-if="isAuthenticated" class="add-comment">
+        <textarea
+          v-model="newComment"
+          placeholder="Write a comment..."
+          rows="3"
+        ></textarea>
+        <button @click="addComment" :disabled="!newComment.trim() || submitting">
+          {{ submitting ? 'Posting...' : 'Post Comment' }}
+        </button>
+      </div>
+      <div v-else class="login-prompt">
+        <router-link to="/login">Login</router-link> to add a comment
+      </div>
 
       <!-- Comments List -->
       <div v-if="comments.length === 0" class="no-comments">
@@ -40,17 +54,36 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { postService } from '../services/api'
+import { postService, commentService } from '../services/api'
+import { useAuth } from '../stores/auth'
+
 const route = useRoute()
 const router = useRouter()
+const { isAuthenticated } = useAuth()
 
 const post = ref(null)
+const newComment = ref('')
+const submitting = ref(false)
 
 const comments = computed(() => post.value?.comments || [])
 
 const loadPost = async () => {
   const res = await postService.get(route.params.id)
   post.value = res.data
+}
+
+const addComment = async () => {
+  if (!newComment.value.trim()) return
+  submitting.value = true
+  try {
+    await commentService.create(route.params.id, { body: newComment.value })
+    newComment.value = ''
+    await loadPost()
+  } catch (e) {
+    alert('Failed to add comment')
+  } finally {
+    submitting.value = false
+  }
 }
 
 const deletePost = async () => {
@@ -93,6 +126,40 @@ h1 { margin: 10px 0; font-size: 2em; }
 }
 .comments-section h2 {
   margin-bottom: 20px;
+}
+.add-comment {
+  margin-bottom: 25px;
+}
+.add-comment textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1em;
+  resize: vertical;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+}
+.add-comment button {
+  background: #42b883;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.add-comment button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.login-prompt {
+  background: #f5f5f5;
+  padding: 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+.login-prompt a {
+  color: #42b883;
 }
 .no-comments {
   color: #888;

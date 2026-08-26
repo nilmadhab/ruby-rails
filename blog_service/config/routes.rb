@@ -9,8 +9,9 @@ Rails.application.routes.draw do
       get "hello", to: "hello#index"
       resources :users
       resources :categories
-      resources :posts
-      resources :comments, only: [:index, :show]
+      resources :posts do
+        resources :comments, only: [:create]
+      end
     end
   end
 
