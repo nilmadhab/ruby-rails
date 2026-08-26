@@ -1,4 +1,5 @@
 class Api::V1::CategoriesController < ApplicationController
+  skip_before_action :authenticate_request, only: [:index, :show]
   before_action :set_category, only: [:show, :update, :destroy]
 
   def index

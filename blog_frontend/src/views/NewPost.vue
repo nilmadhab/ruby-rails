@@ -9,16 +9,6 @@
       </div>
 
       <div class="form-group">
-        <label>Author</label>
-        <select v-model="form.user_id" required>
-          <option value="">Select author</option>
-          <option v-for="user in users" :key="user.id" :value="user.id">
-            {{ user.name }}
-          </option>
-        </select>
-      </div>
-
-      <div class="form-group">
         <label>Category</label>
         <select v-model="form.category_id" required>
           <option value="">Select category</option>
@@ -33,8 +23,12 @@
         <textarea v-model="form.body" required rows="10" placeholder="Write your post..."></textarea>
       </div>
 
+      <div v-if="error" class="error">{{ error }}</div>
+
       <div class="actions">
-        <button type="submit" class="btn">{{ isEditing ? 'Update' : 'Create' }} Post</button>
+        <button type="submit" class="btn" :disabled="loading">
+          {{ loading ? 'Saving...' : (isEditing ? 'Update' : 'Create') }} Post
+        </button>
         <router-link to="/posts" class="btn cancel">Cancel</router-link>
       </div>
     </form>
@@ -44,28 +38,24 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { postService, userService, categoryService } from '../services/api'
+import { postService, categoryService } from '../services/api'
 
 const route = useRoute()
 const router = useRouter()
 
-const users = ref([])
 const categories = ref([])
 const form = ref({
   title: '',
   body: '',
-  user_id: '',
   category_id: ''
 })
+const error = ref('')
+const loading = ref(false)
 
 const isEditing = computed(() => route.name === 'EditPost')
 
 const loadData = async () => {
-  const [usersRes, categoriesRes] = await Promise.all([
-    userService.getAll(),
-    categoryService.getAll()
-  ])
-  users.value = usersRes.data
+  const categoriesRes = await categoryService.getAll()
   categories.value = categoriesRes.data
 
   if (isEditing.value) {
@@ -73,19 +63,26 @@ const loadData = async () => {
     form.value = {
       title: postRes.data.title,
       body: postRes.data.body,
-      user_id: postRes.data.user?.id || postRes.data.user_id,
       category_id: postRes.data.category?.id || postRes.data.category_id
     }
   }
 }
 
 const savePost = async () => {
-  if (isEditing.value) {
-    await postService.update(route.params.id, form.value)
-  } else {
-    await postService.create(form.value)
+  error.value = ''
+  loading.value = true
+  try {
+    if (isEditing.value) {
+      await postService.update(route.params.id, form.value)
+    } else {
+      await postService.create(form.value)
+    }
+    router.push('/posts')
+  } catch (e) {
+    error.value = e.response?.data?.error || e.response?.data?.errors?.join(', ') || 'Failed to save post'
+  } finally {
+    loading.value = false
   }
-  router.push('/posts')
 }
 
 onMounted(loadData)
@@ -106,7 +103,9 @@ h1 { margin-bottom: 20px; }
   font-size: 1em;
 }
 .form-group textarea { resize: vertical; }
+.error { color: #e74c3c; margin-bottom: 15px; }
 .actions { display: flex; gap: 10px; margin-top: 20px; }
 .btn { background: #42b883; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; border: none; cursor: pointer; font-size: 1em; }
+.btn:disabled { opacity: 0.7; cursor: not-allowed; }
 .btn.cancel { background: #888; }
 </style>

@@ -1,4 +1,5 @@
 class Api::V1::PostsController < ApplicationController
+  skip_before_action :authenticate_request, only: [:index, :show]
   before_action :set_post, only: [:show, :update, :destroy]
 
   def index
@@ -11,7 +12,7 @@ class Api::V1::PostsController < ApplicationController
   end
 
   def create
-    @post = Post.new(post_params)
+    @post = current_user.posts.build(post_params)
     if @post.save
       render json: @post, include: [:user, :category], status: :created
     else
@@ -20,6 +21,11 @@ class Api::V1::PostsController < ApplicationController
   end
 
   def update
+    if @post.user_id != current_user.id
+      render json: { error: "Not authorized" }, status: :forbidden
+      return
+    end
+
     if @post.update(post_params)
       render json: @post, include: [:user, :category]
     else
@@ -28,6 +34,11 @@ class Api::V1::PostsController < ApplicationController
   end
 
   def destroy
+    if @post.user_id != current_user.id
+      render json: { error: "Not authorized" }, status: :forbidden
+      return
+    end
+
     @post.destroy
     head :no_content
   end
@@ -39,6 +50,6 @@ class Api::V1::PostsController < ApplicationController
   end
 
   def post_params
-    params.require(:post).permit(:title, :body, :user_id, :category_id)
+    params.require(:post).permit(:title, :body, :category_id)
   end
 end
