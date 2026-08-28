@@ -19,7 +19,9 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(bundle exec rspec:*)",
-      "Bash(ruby:*)"
+      "Bash(ruby:*)",
+      "Bash(bundle exec *)",
+      "Bash(DISABLE_DATABASE_ENVIRONMENT_CHECK=1 RAILS_ENV=test bin/rails:*)"
     ]
   }
 }

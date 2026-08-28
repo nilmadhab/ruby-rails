@@ -11,6 +11,7 @@ Rails.application.routes.draw do
       resources :categories
       resources :posts do
         resources :comments, only: [:create]
+        resources :likes, only: [:create]
       end
     end
   end

@@ -12,7 +12,8 @@ class Api::V1::PostsController < ApplicationController
       user: { only: [:id, :name, :email] },
       category: { only: [:id, :name] },
       comments: { include: { user: { only: [:id, :name] } } }
-    })
+      #liked_by_current_user: @post.liked_by?(current_user) 
+    }).merge(liked_by_current_user: @post.liked_by?(current_user), likes_count: @post.likes_count)
   end
 
   def create

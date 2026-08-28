@@ -71,4 +71,9 @@ export const commentService = {
   delete: (postId, id) => api.delete(`/posts/${postId}/comments/${id}`)
 }
 
+export const likeService = {
+  like: (postId) => api.post(`/posts/${postId}/likes`),
+  unlike: (postId) => api.delete(`/posts/${postId}/likes`),
+}
+
 export default api

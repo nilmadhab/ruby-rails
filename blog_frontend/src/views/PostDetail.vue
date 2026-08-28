@@ -8,6 +8,19 @@
       <h1>{{ post.title }}</h1>
       <div class="meta">By {{ post.user?.name }}</div>
       <div class="content">{{ post.body }}</div>
+
+      <!-- Like Section -->
+      <div class="like-section">
+        <button
+          @click="toggleLike"
+          :class="['like-btn', { liked: isLiked }]"
+          :disabled="!isAuthenticated || liking"
+        >
+          <span class="heart">{{ isLiked ? '❤️' : '🤍' }}</span>
+          <span class="count">{{ likesCount }}</span>
+        </button>
+        <span v-if="!isAuthenticated" class="like-hint">Login to like</span>
+      </div>
     </article>
     <div class="actions">
       <router-link :to="`/posts/${post.id}/edit`" class="btn">Edit Post</router-link>
@@ -54,7 +67,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { postService, commentService } from '../services/api'
+import { postService, commentService, likeService } from '../services/api'
 import { useAuth } from '../stores/auth'
 
 const route = useRoute()
@@ -64,12 +77,35 @@ const { isAuthenticated } = useAuth()
 const post = ref(null)
 const newComment = ref('')
 const submitting = ref(false)
+const liking = ref(false)
 
 const comments = computed(() => post.value?.comments || [])
+const isLiked = computed(() => post.value?.liked_by_current_user || false)
+const likesCount = computed(() => post.value?.likes_count || 0)
 
 const loadPost = async () => {
   const res = await postService.get(route.params.id)
   post.value = res.data
+}
+
+const toggleLike = async () => {
+  if (!isAuthenticated.value || liking.value) return
+  liking.value = true
+  try {
+    if (isLiked.value) {
+      await likeService.unlike(route.params.id)
+      post.value.liked_by_current_user = false
+      post.value.likes_count--
+    } else {
+      await likeService.like(route.params.id)
+      post.value.liked_by_current_user = true
+      post.value.likes_count++
+    }
+  } catch (e) {
+    console.error('Failed to toggle like', e)
+  } finally {
+    liking.value = false
+  }
 }
 
 const addComment = async () => {
@@ -113,6 +149,50 @@ article { margin-top: 20px; }
 h1 { margin: 10px 0; font-size: 2em; }
 .meta { color: #888; margin-bottom: 20px; }
 .content { line-height: 1.8; white-space: pre-wrap; }
+
+/* Like Section */
+.like-section {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.like-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  background: white;
+  cursor: pointer;
+  font-size: 1em;
+  transition: all 0.2s;
+}
+.like-btn:hover:not(:disabled) {
+  border-color: #e74c3c;
+  background: #fff5f5;
+}
+.like-btn.liked {
+  border-color: #e74c3c;
+  background: #fff5f5;
+}
+.like-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.like-btn .heart {
+  font-size: 1.2em;
+}
+.like-btn .count {
+  font-weight: 600;
+  color: #333;
+}
+.like-hint {
+  color: #888;
+  font-size: 0.85em;
+}
+
 .actions { margin-top: 30px; display: flex; gap: 10px; }
 .btn { background: #42b883; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; border: none; cursor: pointer; }
 .btn.delete { background: #e74c3c; }

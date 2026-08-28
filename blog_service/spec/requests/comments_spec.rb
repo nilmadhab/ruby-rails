@@ -8,6 +8,8 @@ RSpec.describe "Comments API", type: :request do
   describe "POST /api/v1/posts/:post_id/comments" do
     let(:valid_params) { { comment: { body: "Great post!" } } }
 
+    before { pp user }
+
     context "when authenticated" do
       it "creates a new comment" do
         expect {
@@ -15,7 +17,7 @@ RSpec.describe "Comments API", type: :request do
                params: valid_params,
                headers: auth_headers(user)
         }.to change(Comment, :count).by(1)
-
+        puts JSON.pretty_generate(JSON.parse(response.body))
         expect(response).to have_http_status(:created)
         json = JSON.parse(response.body)
         expect(json['body']).to eq("Great post!")
