@@ -72,8 +72,8 @@ export const commentService = {
 }
 
 export const likeService = {
-  like: (postId) => api.post(`/posts/${postId}/likes`),
-  unlike: (postId) => api.delete(`/posts/${postId}/likes`),
+  like: (postId) => api.post(`/posts/${postId}/like`),
+  unlike: (postId) => api.delete(`/posts/${postId}/like`),
 }
 
 export default api
